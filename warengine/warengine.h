@@ -53,6 +53,7 @@ struct WARAPI AI_INPUT
 	bool obst_down = false;
 
 	bool tree_in_range = false;
+	bool base_under_attack = false;
 };
 
 struct WARAPI AI_OUTPUT

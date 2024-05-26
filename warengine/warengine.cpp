@@ -146,7 +146,7 @@ class HERO :public dll::PERSON
 			{
 				if (lifes < AIDataIN.near_enemy_lifes / 2)
 				{
-					AIDataOut.new_action = actions::shelter;
+					AIDataOut.new_action = actions::move;
 					AIDataOut.new_x = AIDataIN.shelter_x;
 					AIDataOut.new_y = AIDataIN.shelter_y;
 					return;
@@ -156,6 +156,24 @@ class HERO :public dll::PERSON
 					AIDataOut.new_action = actions::shoot;
 					AIDataOut.new_x = AIDataIN.near_enemy_x;
 					AIDataOut.new_y = AIDataIN.near_enemy_y;
+					return;
+				}
+			}
+			else if (AIDataIN.base_under_attack)
+			{
+				if (x >= AIDataIN.shelter_x - 50.0f && x <= AIDataIN.shelter_x + 50.0f
+					&& y >= AIDataIN.shelter_y - 50.0f && y <= AIDataIN.shelter_y + 50.0f)
+				{
+					AIDataOut.new_action = actions::shoot;
+					AIDataOut.new_x = AIDataIN.near_enemy_x;
+					AIDataOut.new_y = AIDataIN.near_enemy_y;
+					return;
+				}
+				else
+				{
+					AIDataOut.new_action = actions::move;
+					AIDataOut.new_x = AIDataIN.shelter_x;
+					AIDataOut.new_y = AIDataIN.shelter_y;
 					return;
 				}
 			}
