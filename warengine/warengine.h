@@ -37,9 +37,8 @@ struct WARAPI AI_INPUT
 {
 	actions current_action = actions::stop;
 
-	float shelter_x = 0;
-	float shelter_y = 0;
-
+	RECT shelter = { 0 };
+	
 	float near_enemy_x = 0;
 	float near_enemy_y = 0;
 	int near_enemy_lifes = 0;

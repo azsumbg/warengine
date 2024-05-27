@@ -147,8 +147,8 @@ class HERO :public dll::PERSON
 				if (lifes < AIDataIN.near_enemy_lifes / 2)
 				{
 					AIDataOut.new_action = actions::move;
-					AIDataOut.new_x = AIDataIN.shelter_x;
-					AIDataOut.new_y = AIDataIN.shelter_y;
+					AIDataOut.new_x = (float)(AIDataIN.shelter.left + 50);
+					AIDataOut.new_y = (float)(AIDataIN.shelter.top + 50);
 					return;
 				}
 				else
@@ -161,8 +161,8 @@ class HERO :public dll::PERSON
 			}
 			else if (AIDataIN.base_under_attack)
 			{
-				if (x >= AIDataIN.shelter_x - 50.0f && x <= AIDataIN.shelter_x + 50.0f
-					&& y >= AIDataIN.shelter_y - 50.0f && y <= AIDataIN.shelter_y + 50.0f)
+				if (x >= (float)(AIDataIN.shelter.left) && x <= (float)(AIDataIN.shelter.right)
+					&& y >= (float)(AIDataIN.shelter.top + 50) && y <= (float)(AIDataIN.shelter.bottom))
 				{
 					AIDataOut.new_action = actions::shoot;
 					AIDataOut.new_x = AIDataIN.near_enemy_x;
@@ -172,8 +172,8 @@ class HERO :public dll::PERSON
 				else
 				{
 					AIDataOut.new_action = actions::move;
-					AIDataOut.new_x = AIDataIN.shelter_x;
-					AIDataOut.new_y = AIDataIN.shelter_y;
+					AIDataOut.new_x = (float)(AIDataIN.shelter.left + 50);
+					AIDataOut.new_y = (float)(AIDataIN.shelter.top + 50);
 					return;
 				}
 			}
@@ -193,11 +193,202 @@ class HERO :public dll::PERSON
 		}
 };
 
+class EVILS :public dll::PERSON
+{
+	public:
 
+		EVILS(creatures what, float _x, float _y) :PERSON(what, _x, _y)
+		{
+			AIDataIN.current_action = actions::move;
+		}
 
+		void Release() override
+		{
+			delete this;
+		}
+		int Move(float _speed, float final_x, float final_y) override
+		{
+			float my_speed = speed + _speed;
 
+			Path.start_x = x;
+			Path.start_y = y;
+			Path.dest_x = final_x;
+			Path.dest_y = final_y;
 
+			if (Path.dest_x - Path.start_x == 0)
+			{
+				Path.slope = 0;
+				Path.intercept = 0;
+				Path.speed_when_vertical = my_speed;
 
+				if (Path.start_y < Path.dest_y)
+				{
+					dir = dirs::up;
+					if (y - my_speed >= 50.0f)
+					{
+						y -= my_speed;
+						SetEdges();
+						return DLL_OK;
+					}
+					else return DLL_FAIL;
+				}
+				else
+				{
+					dir = dirs::down;
+					if (y + my_speed <= scr_height - 100.0f)
+					{
+						y += my_speed;
+						SetEdges();
+						return DLL_OK;
+					}
+					else return DLL_FAIL;
+				}
+			}
+			else
+			{
+				Path.slope = (final_y - Path.start_y) / (final_x - Path.start_x);
+				Path.intercept = Path.start_y - Path.slope * Path.start_x;
+
+				if (Path.start_y > Path.dest_y)
+				{
+					if (Path.start_x > Path.dest_x)
+					{
+						dir = dirs::u_l;
+						x -= my_speed;
+						y = Path.slope * x + Path.intercept;
+						SetEdges();
+						return DLL_OK;
+					}
+					else
+					{
+						dir = dirs::u_r;
+						x += my_speed;
+						y = Path.slope * x + Path.intercept;
+						SetEdges();
+						return DLL_OK;
+					}
+				}
+				else if (Path.start_y < Path.dest_y)
+				{
+					if (Path.start_x > Path.dest_x)
+					{
+						dir = dirs::d_l;
+						x -= my_speed;
+						y = Path.slope * x + Path.intercept;
+						SetEdges();
+						return DLL_OK;
+					}
+					else
+					{
+						dir = dirs::d_r;
+						x += my_speed;
+						y = Path.slope * x + Path.intercept;
+						SetEdges();
+						return DLL_OK;
+					}
+				}
+				else if (Path.start_y == Path.dest_y)
+				{
+					if (Path.start_x > Path.dest_x)
+					{
+						dir = dirs::left;
+						x -= my_speed;
+						SetEdges();
+						return DLL_OK;
+					}
+					else
+					{
+						dir = dirs::right;
+						x += my_speed;
+						SetEdges();
+						return DLL_OK;
+					}
+				}
+			}
+
+			return DLL_FAIL;
+		}
+		bool Shoot() override
+		{
+			shoot_delay--;
+			if (shoot_delay < 0)
+			{
+				shoot_delay = 25;
+				return true;
+			}
+			return false;
+		}
+		bool Chop() override
+		{
+			return false;
+		}
+		void AIManager(AI_INPUT Input)
+		{
+			AIDataIN = Input;
+
+			if (AIDataIN.obst_down)
+			{
+				AIDataOut.new_action = actions::move;
+				AIDataOut.new_x = AIDataIN.near_enemy_x;
+				AIDataOut.new_y = 50.0f;
+				AIDataIN.obst_down = false;
+				return;
+			}
+			else if (AIDataIN.obst_up)
+			{
+				AIDataOut.new_action = actions::move;
+				AIDataOut.new_x = AIDataIN.near_enemy_x;
+				AIDataOut.new_y = scr_height;
+				AIDataIN.obst_up = false;
+				return;
+			}
+			else if (AIDataIN.obst_left)
+			{
+				AIDataOut.new_action = actions::move;
+				AIDataOut.new_x = scr_width;
+				AIDataOut.new_y = AIDataIN.near_enemy_y;
+				AIDataIN.obst_left = false;
+				return;
+			}
+			else if (AIDataIN.obst_right)
+			{
+				AIDataOut.new_action = actions::move;
+				AIDataOut.new_x = 0;
+				AIDataOut.new_y = AIDataIN.near_enemy_y;
+				AIDataIN.obst_right = false;
+				return;
+			}
+
+			if (x >= (float)(AIDataIN.shelter.left) && x <= (float)(AIDataIN.shelter.right) &&
+				y >= (float)(AIDataIN.shelter.top) && y <= (float)(AIDataIN.shelter.bottom))
+			{
+				AIDataOut.new_action = actions::shoot;
+				AIDataOut.new_x = (float)(AIDataIN.shelter.left + 50);
+				AIDataOut.new_y = (float)(AIDataIN.shelter.top);
+				return;
+			}
+			else if (x >= AIDataIN.near_enemy_x - 50.0f && x <= AIDataIN.near_enemy_x + 50.0f &&
+				y >= AIDataIN.near_enemy_y - 50.0f && y <= AIDataIN.near_enemy_y + 50.0f)
+			{
+				AIDataOut.new_action = actions::shoot;
+				AIDataOut.new_x = AIDataIN.near_enemy_x;
+				AIDataOut.new_y = AIDataIN.near_enemy_y;
+				return;
+			}
+
+			if ((float)(abs(x - AIDataIN.near_enemy_x)) <= 100 && (float)(abs(y - AIDataIN.near_enemy_y)) <= 100)
+			{
+				AIDataOut.new_action = actions::move;
+				AIDataOut.new_x = AIDataIN.near_enemy_x;
+				AIDataOut.new_y = AIDataIN.near_enemy_y;
+				return;
+			}
+
+			AIDataOut.new_action = actions::move;
+			AIDataOut.new_x = AIDataIN.shelter.left + 50.0f;
+			AIDataOut.new_y = AIDataIN.shelter.top + 50.0f;
+		}
+};
 
 //FUNCTIONS **********************
 
@@ -283,5 +474,33 @@ dll::Tile dll::BUILDING::TileFactory(buildings what, float start_x, float start_
 
 	ret = new BUILDING(what, start_x, start_y);
 
+	return ret;
+}
+dll::Creature dll::CreatureFactory(creatures who, float start_x, float start_y)
+{
+	Creature ret = nullptr;
+
+	switch (who)
+	{
+	case creatures::hero:
+		ret = new HERO(start_x, start_y);
+		break;
+
+	case creatures::evil1:
+		ret = new EVILS(creatures::evil1, start_x, start_y);
+		break;
+
+	case creatures::evil2:
+		ret = new EVILS(creatures::evil2, start_x, start_y);
+		break;
+
+	case creatures::evil3:
+		ret = new EVILS(creatures::evil3, start_x, start_y);
+		break;
+
+	case creatures::bear:
+		ret = new EVILS(creatures::bear, start_x, start_y);
+		break;
+	}
 	return ret;
 }
