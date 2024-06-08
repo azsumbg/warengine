@@ -137,17 +137,17 @@ namespace dll
 			int shoot_delay = 25;
 			int chop_delay = 25;
 			PATH Path;
-			AI_INPUT AIDataIN;
-
+			
 		public:
 			int lifes = 0;
 			creatures type = creatures::hero;
 			dirs dir = dirs::right;
 			AI_OUTPUT AIDataOut;
-			
+			AI_INPUT AIDataIN;
+
 			PERSON(creatures who, float _x, float _y) :OBJECT(_x, _y)
 			{
-				x += _x;
+				x = _x;
 				y = _y;
 				type = who;
 
@@ -220,7 +220,7 @@ namespace dll
 					break;
 
 				case buildings::home:
-					NewDims(100.0f, 64.0f);
+					NewDims(50.0f, 32.0f);
 					lifes = 200;
 					break;
 
@@ -235,7 +235,7 @@ namespace dll
 					break;
 
 				case buildings::wall:
-					NewDims(100.0f, 70.0f);
+					NewDims(50.0f, 50.0f);
 					lifes = 100;
 					break;
 
@@ -332,7 +332,7 @@ namespace dll
 	//Set dest_x and dest_y using tangens of input angle, then set slope and intercept. 
 	// !!! start_x and start_y must be set !!! 
 	
-	extern WARAPI float SetTargetY(float angle, dirs move_dir, PATH& PathData);
+	extern WARAPI void SetTargetY(float angle, dirs move_dir, PATH& PathData);
 
 	extern WARAPI Creature CreatureFactory(creatures who, float start_x, float start_y);
 }

@@ -186,8 +186,24 @@ class HERO :public dll::PERSON
 			else
 			{
 				AIDataOut.new_action = actions::move;
-				AIDataOut.new_x = AIDataIN.near_tree_x;
-				AIDataOut.new_y = AIDataIN.near_tree_y;
+				if (Input.obst_down || Input.obst_up || Input.obst_left || Input.obst_right)
+				{
+					if (Input.obst_left)AIDataOut.new_x = scr_width;
+					if (Input.obst_right)AIDataOut.new_x = 0;
+					if (Input.obst_up)AIDataOut.new_y = scr_height - 100;
+					if (Input.obst_down)AIDataOut.new_y = 50.0f;
+
+					AIDataIN.obst_down = false;
+					AIDataIN.obst_up = false;
+					AIDataIN.obst_left = false;
+					AIDataIN.obst_right = false;
+
+				}
+				else
+				{
+					AIDataOut.new_x = (float)(Input.shelter.left);
+					AIDataOut.new_y = (float)(Input.shelter.top);
+				}
 				return;
 			}
 		}
@@ -413,7 +429,7 @@ float dll::GetNextYFromPath(float next_x, PATH PathData)
 	}
 	return PathData.slope * next_x + PathData.intercept;
 }
-float dll::SetTargetY(float angle, dirs move_dir, PATH& PathData)
+void dll::SetTargetY(float angle, dirs move_dir, PATH& PathData)
 {
 	float rad_angle = angle * (3.14f / 180.0f);
 	float known_cathet = 0;
