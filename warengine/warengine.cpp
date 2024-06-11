@@ -41,10 +41,10 @@ class HERO :public dll::PERSON
 					}
 					else return DLL_FAIL;
 				}
-				else
+				else if (Path.start_y > Path.dest_y)
 				{
 					dir = dirs::down;
-					if (y + my_speed <= scr_height - 100.0f)
+					if (y + my_speed < scr_height - 100.0f)
 					{
 						y += my_speed;
 						SetEdges();
@@ -63,18 +63,30 @@ class HERO :public dll::PERSON
 					if (Path.start_x > Path.dest_x)
 					{
 						dir = dirs::u_l;
-						x -= my_speed;
-						y = Path.slope * x + Path.intercept;
-						SetEdges();
-						return DLL_OK;
+						if (x - my_speed >= 0) x -= my_speed;
+						else return DLL_FAIL;
+
+						if (Path.slope * x + Path.intercept >= 50.0f)
+						{
+							y = Path.slope * x + Path.intercept;
+							SetEdges();
+							return DLL_OK;
+						}
+						else return DLL_FAIL;
 					}
-					else
+					else if (Path.start_x < Path.dest_x)
 					{
 						dir = dirs::u_r;
-						x += my_speed;
-						y = Path.slope * x + Path.intercept;
-						SetEdges();
-						return DLL_OK;
+						if (x + my_speed <= scr_width) x += my_speed;
+						else return DLL_FAIL;
+
+						if (Path.slope * x + Path.intercept >= 50.0f)
+						{
+							y = Path.slope * x + Path.intercept;
+							SetEdges();
+							return DLL_OK;
+						}
+						else return DLL_FAIL;
 					}
 				}
 				else if (Path.start_y < Path.dest_y)
@@ -82,18 +94,30 @@ class HERO :public dll::PERSON
 					if (Path.start_x > Path.dest_x)
 					{
 						dir = dirs::d_l;
-						x -= my_speed;
-						y = Path.slope * x + Path.intercept;
-						SetEdges();
-						return DLL_OK;
+						if (x - my_speed >= 0) x -= my_speed;
+						else return DLL_FAIL;
+
+						if (Path.slope * x + Path.intercept <= scr_height - 100.0f)
+						{
+							y = Path.slope * x + Path.intercept;
+							SetEdges();
+							return DLL_OK;
+						}
+						else return DLL_FAIL;
 					}
-					else
+					else if (Path.start_x < Path.dest_x)
 					{
 						dir = dirs::d_r;
-						x += my_speed;
-						y = Path.slope * x + Path.intercept;
-						SetEdges();
-						return DLL_OK;
+						if (x + my_speed <= scr_width) x += my_speed;
+						else return DLL_FAIL;
+
+						if (Path.slope * x + Path.intercept <= scr_height - 100.0f)
+						{
+							y = Path.slope * x + Path.intercept;
+							SetEdges();
+							return DLL_OK;
+						}
+						else return DLL_FAIL;
 					}
 				}
 				else if (Path.start_y == Path.dest_y)
@@ -101,20 +125,29 @@ class HERO :public dll::PERSON
 					if (Path.start_x > Path.dest_x)
 					{
 						dir = dirs::left;
-						x -= my_speed;
-						SetEdges();
-						return DLL_OK;
+						if (x - my_speed >= 0)
+						{
+							x -= my_speed;
+							SetEdges();
+							return DLL_OK;
+						}
+						else return DLL_FAIL;
 					}
-					else
+					else if (Path.start_x < Path.dest_x)
 					{
 						dir = dirs::right;
-						x += my_speed;
-						SetEdges();
-						return DLL_OK;
+						if (x + my_speed <= scr_width)
+						{
+							x += my_speed;
+							SetEdges();
+							return DLL_OK;
+						}
+						else return DLL_FAIL;
 					}
 				}
 			}
 
+			dir = dirs::stop;
 			return DLL_FAIL;
 		} 
 		bool Shoot() override
@@ -177,8 +210,9 @@ class HERO :public dll::PERSON
 					return;
 				}
 			}
-			else if (x >= AIDataIN.near_tree_x - 10.0f && x <= AIDataIN.near_tree_x + 10.0f
+			else if (x >= AIDataIN.near_tree_x - 10.0f && x <= AIDataIN.near_tree_x + 10.0f 
 				&& y >= AIDataIN.near_tree_y - 10.0f && y <= AIDataIN.near_tree_y + 10.0f)
+	
 			{
 				AIDataOut.new_action = actions::chop;
 				return;
@@ -190,21 +224,16 @@ class HERO :public dll::PERSON
 				{
 					if (Input.obst_left)AIDataOut.new_x = scr_width;
 					if (Input.obst_right)AIDataOut.new_x = 0;
-					if (Input.obst_up)AIDataOut.new_y = scr_height - 100;
+					if (Input.obst_up)AIDataOut.new_y = scr_height - 100.0f;
 					if (Input.obst_down)AIDataOut.new_y = 50.0f;
 
-					AIDataIN.obst_down = false;
-					AIDataIN.obst_up = false;
-					AIDataIN.obst_left = false;
-					AIDataIN.obst_right = false;
-
+					return;
 				}
 				else
 				{
-					AIDataOut.new_x = (float)(Input.shelter.left);
-					AIDataOut.new_y = (float)(Input.shelter.top);
+					AIDataOut.new_x = Input.near_tree_x;
+					AIDataOut.new_y = Input.near_tree_y;
 				}
-				return;
 			}
 		}
 };
