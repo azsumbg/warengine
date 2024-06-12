@@ -17,7 +17,7 @@ class HERO :public dll::PERSON
 
 		int Move(float _speed, float final_x, float final_y) override
 		{
-			float my_speed = speed + _speed;
+			float my_speed = speed * (_speed / 2);
 
 			Path.start_x = x;
 			Path.start_y = y;
@@ -174,7 +174,7 @@ class HERO :public dll::PERSON
 		{
 			AIDataIN = Input;
 
-			if (x >= AIDataIN.near_enemy_x - 50.0f && x <= AIDataIN.near_enemy_x + 50.0f
+			if (AIDataIN.exist_enemy && x >= AIDataIN.near_enemy_x - 50.0f && x <= AIDataIN.near_enemy_x + 50.0f
 				&& y >= AIDataIN.near_enemy_y - 50.0f && y <= AIDataIN.near_enemy_y + 50.0f)
 			{
 				if (lifes < AIDataIN.near_enemy_lifes / 2)
@@ -210,8 +210,7 @@ class HERO :public dll::PERSON
 					return;
 				}
 			}
-			else if (x >= AIDataIN.near_tree_x - 10.0f && x <= AIDataIN.near_tree_x + 10.0f 
-				&& y >= AIDataIN.near_tree_y - 10.0f && y <= AIDataIN.near_tree_y + 10.0f)
+			else if (AIDataIN.exist_tree && AIDataIN.tree_in_range)
 	
 			{
 				AIDataOut.new_action = actions::chop;
@@ -229,10 +228,13 @@ class HERO :public dll::PERSON
 
 					return;
 				}
-				else
+				else 
 				{
-					AIDataOut.new_x = Input.near_tree_x;
-					AIDataOut.new_y = Input.near_tree_y;
+					if (AIDataIN.exist_tree)
+					{
+						AIDataOut.new_x = Input.near_tree_x;
+						AIDataOut.new_y = Input.near_tree_y;
+					}
 				}
 			}
 		}
@@ -253,7 +255,7 @@ class EVILS :public dll::PERSON
 		}
 		int Move(float _speed, float final_x, float final_y) override
 		{
-			float my_speed = speed + _speed;
+			float my_speed = speed * (_speed / 2);
 
 			Path.start_x = x;
 			Path.start_y = y;

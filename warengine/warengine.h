@@ -45,6 +45,7 @@ struct WARAPI AI_INPUT
 
 	float near_tree_x = 0;
 	float near_tree_y = 0;
+	int chopped_tree_number = -1;
 
 	bool obst_left = false;
 	bool obst_right = false;
@@ -53,6 +54,10 @@ struct WARAPI AI_INPUT
 
 	bool tree_in_range = false;
 	bool base_under_attack = false;
+
+	bool exist_tree = true;
+	bool exist_enemy = true;
+
 };
 
 struct WARAPI AI_OUTPUT
@@ -221,7 +226,7 @@ namespace dll
 
 				case buildings::home:
 					NewDims(50.0f, 32.0f);
-					lifes = 200;
+					lifes = 2000;
 					break;
 
 				case buildings::tower:
@@ -231,17 +236,17 @@ namespace dll
 
 				case buildings::townhall:
 					NewDims(150.0f, 140.0f);
-					lifes = 500;
+					lifes = 50000;
 					break;
 
 				case buildings::wall:
 					NewDims(50.0f, 50.0f);
-					lifes = 100;
+					lifes = 5000;
 					break;
 
 				case buildings::tree:
 					NewDims(47.0f, 50.0f);
-					lifes = 100;
+					lifes = 10000;
 					break;
 				}
 			}
